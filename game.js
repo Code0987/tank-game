@@ -12,17 +12,18 @@ const roundsSelect = document.getElementById('roundsSelect');
 
 let gameRunning = false;
 let keys = {};
-let player, bot, balls = [], particles = [];
+let player, bot, weapons = [], particles = [];
 let round = 1;
 let maxRounds = 5;
 let difficulty = 1;
 let gameOver = false;
 let lastRoundTime = 0;
 
-const BALL_TYPES = [
-    { name: 'Bullet', color: '#ffff00', speed: 8, damage: 8, size: 6 },
-    { name: 'Fireball', color: '#ff8800', speed: 5, damage: 6, size: 8 },
-    { name: 'Snowball', color: '#88ffff', speed: 6, damage: 5, size: 7 }
+// Weapons (faster projectiles; renamed from balls per request)
+const WEAPON_TYPES = [
+    { name: 'Bullet', color: '#ffff00', speed: 12, damage: 8, size: 6 },
+    { name: 'Fireball', color: '#ff8800', speed: 9, damage: 6, size: 8 },
+    { name: 'Snowball', color: '#88ffff', speed: 10, damage: 5, size: 7 }
 ];
 
 class Tank {
@@ -91,34 +92,34 @@ class Tank {
         if (now - this.lastShot < 1500) return;
         this.lastShot = now;
         
-        const ballType = BALL_TYPES[(round - 1) % BALL_TYPES.length];
+        const weaponType = WEAPON_TYPES[(round - 1) % WEAPON_TYPES.length];
         const barrelLength = 25;
         let vx = 0, vy = 0;
         let startX = this.x + this.width/2;
         let startY = this.y + this.height/2;
         
         if (this.direction === 'right') {
-            vx = ballType.speed;
+            vx = weaponType.speed;
             startX += barrelLength;
         } else if (this.direction === 'left') {
-            vx = -ballType.speed;
+            vx = -weaponType.speed;
             startX -= barrelLength;
         } else if (this.direction === 'up') {
-            vy = -ballType.speed;
+            vy = -weaponType.speed;
             startY -= barrelLength;
         } else if (this.direction === 'down') {
-            vy = ballType.speed;
+            vy = weaponType.speed;
             startY += barrelLength;
         }
         
-        balls.push({
+        weapons.push({
             x: startX,
             y: startY,
             vx: vx,
             vy: vy,
-            type: ballType,
+            type: weaponType,
             owner: this.isPlayer ? 'player' : 'bot',
-            size: ballType.size
+            size: weaponType.size
         });
     }
 }
@@ -215,26 +216,26 @@ function update() {
         bot.shoot();
     }
     
-    // Update balls
-    for (let i = balls.length - 1; i >= 0; i--) {
-        const b = balls[i];
-        b.x += b.vx;
-        b.y += b.vy;
+    // Update weapons (faster projectiles)
+    for (let i = weapons.length - 1; i >= 0; i--) {
+        const w = weapons[i];
+        w.x += w.vx;
+        w.y += w.vy;
         
         // Bounce off walls or remove
-        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
-            balls.splice(i, 1);
+        if (w.x < 0 || w.x > canvas.width || w.y < 0 || w.y > canvas.height) {
+            weapons.splice(i, 1);
             continue;
         }
         
         // Check hit player
-        if (b.owner === 'bot') {
+        if (w.owner === 'bot') {
             const playerRect = {x: player.x, y: player.y, width: player.width, height: player.height};
-            const ballRect = {x: b.x - b.size/2, y: b.y - b.size/2, width: b.size, height: b.size};
-            if (checkCollision(playerRect, ballRect)) {
-                player.health -= b.type.damage;
-                createExplosion(b.x, b.y, b.type.color);
-                balls.splice(i, 1);
+            const weaponRect = {x: w.x - w.size/2, y: w.y - w.size/2, width: w.size, height: w.size};
+            if (checkCollision(playerRect, weaponRect)) {
+                player.health -= w.type.damage;
+                createExplosion(w.x, w.y, w.type.color);
+                weapons.splice(i, 1);
                 if (player.health <= 0) {
                     // Respawn on death to continue to next round (no full end)
                     player.health = 100;
@@ -246,13 +247,13 @@ function update() {
         }
         
         // Check hit bot
-        if (b.owner === 'player') {
+        if (w.owner === 'player') {
             const botRect = {x: bot.x, y: bot.y, width: bot.width, height: bot.height};
-            const ballRect = {x: b.x - b.size/2, y: b.y - b.size/2, width: b.size, height: b.size};
-            if (checkCollision(botRect, ballRect)) {
-                bot.health -= b.type.damage;
-                createExplosion(b.x, b.y, b.type.color);
-                balls.splice(i, 1);
+            const weaponRect = {x: w.x - w.size/2, y: w.y - w.size/2, width: w.size, height: w.size};
+            if (checkCollision(botRect, weaponRect)) {
+                bot.health -= w.type.damage;
+                createExplosion(w.x, w.y, w.type.color);
+                weapons.splice(i, 1);
                 if (bot.health <= 0) {
                     // Respawn on death to continue to next round (no full end)
                     bot.health = 100;
@@ -277,7 +278,7 @@ function update() {
     playerHealthEl.textContent = Math.max(0, Math.floor(player.health));
     botHealthEl.textContent = Math.max(0, Math.floor(bot.health));
     roundEl.textContent = `${round}/${maxRounds}`;
-    ballTypeEl.textContent = BALL_TYPES[(round - 1) % BALL_TYPES.length].name;
+    ballTypeEl.textContent = WEAPON_TYPES[(round - 1) % WEAPON_TYPES.length].name;
 
     // Advance round every 30 seconds (or end if max reached)
     const currentTime = Date.now();
@@ -291,7 +292,7 @@ function update() {
         bot.x = 550 + Math.random() * 50;
         bot.y = 200 + Math.random() * 200;
         bot.health = 100;
-        balls = [];
+        weapons = [];
         
         // Check if game should end after max rounds (post-increment)
         if (round > maxRounds && maxRounds !== 999) {
@@ -332,18 +333,18 @@ function draw() {
         return;
     }
     
-    // Draw balls
-    for (let b of balls) {
-        ctx.fillStyle = b.type.color;
+    // Draw weapons (faster projectiles)
+    for (let w of weapons) {
+        ctx.fillStyle = w.type.color;
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.arc(w.x, w.y, w.size, 0, Math.PI * 2);
         ctx.fill();
         
-        // Glow for special balls
-        if (b.type.name !== 'Bullet') {
-            ctx.fillStyle = b.type.color + '88';
+        // Glow for special weapons
+        if (w.type.name !== 'Bullet') {
+            ctx.fillStyle = w.type.color + '88';
             ctx.beginPath();
-            ctx.arc(b.x, b.y, b.size * 1.5, 0, Math.PI * 2);
+            ctx.arc(w.x, w.y, w.size * 1.5, 0, Math.PI * 2);
             ctx.fill();
         }
     }
@@ -375,12 +376,12 @@ function startGame(diff) {
     // Reset entities
     player = new Tank(150, 300, '#00ff00', true);
     bot = new Tank(600, 300, '#ff0000', false);
-    balls = [];
+    weapons = [];
     particles = [];
     lastRoundTime = Date.now();
     
-    // Initial round ball type display
-    ballTypeEl.textContent = BALL_TYPES[0].name;
+    // Initial round weapon type display
+    ballTypeEl.textContent = WEAPON_TYPES[0].name;
     
     // Start loop if not running
     if (!gameRunning) gameLoop(); // but it's always called
@@ -389,7 +390,7 @@ function startGame(diff) {
 function endGame(playerWon) {
     gameRunning = false;
     gameOver = true;
-    balls = [];
+    weapons = [];
     particles = [];
     gameOverEl.style.display = 'block';
     resultEl.textContent = playerWon ? 'You Win!' : 'Game Over';
