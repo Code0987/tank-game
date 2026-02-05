@@ -273,6 +273,15 @@ function update() {
     const currentTime = Date.now();
     if (currentTime - lastRoundTime > 20000 && gameRunning) {
         lastRoundTime = currentTime;
+        
+        // Check if game should end after completing current max round
+        if (round >= maxRounds && maxRounds !== 999) {
+            // End based on final health comparison
+            const playerWon = player.health >= bot.health;
+            endGame(playerWon);
+            return;
+        }
+        
         round++;
         // Respawn at sides with full health for new round
         player.x = 150 + Math.random() * 50;
@@ -282,14 +291,6 @@ function update() {
         bot.y = 200 + Math.random() * 200;
         bot.health = 100;
         balls = [];
-        
-        // Check if game should end after max rounds
-        if (round > maxRounds) {
-            // End based on final health comparison
-            const playerWon = player.health >= bot.health;
-            endGame(playerWon);
-            return;
-        }
     }
 }
 
