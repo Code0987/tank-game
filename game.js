@@ -195,7 +195,7 @@ function update() {
     const dyBot = player.y - bot.y;
     const dist = Math.sqrt(dxBot * dxBot + dyBot * dyBot);
     
-    // Move towards player but maintain distance (back off if too close)
+    // Move towards/away but maintain distance; always face player to avoid random firing
     let botDx = 0, botDy = 0;
     const idealDist = 180;
     if (dist > idealDist + 20) {
@@ -207,12 +207,19 @@ function update() {
         botDx = -(dxBot / dist) * bot.speed * 0.7;
         botDy = -(dyBot / dist) * bot.speed * 0.7;
     }
-    // Add randomness for lower difficulty
-    if (difficulty < 3) {
-        botDx += (Math.random() - 0.5) * (3 - difficulty);
-        botDy += (Math.random() - 0.5) * (3 - difficulty);
+    // Minimal randomness for lower difficulty only (no flicker)
+    if (difficulty < 2) {
+        botDx += (Math.random() - 0.5) * 0.5;
+        botDy += (Math.random() - 0.5) * 0.5;
     }
     bot.move(botDx, botDy);
+    
+    // Force face player for consistent shooting direction
+    if (Math.abs(dxBot) > Math.abs(dyBot)) {
+        bot.direction = dxBot > 0 ? 'right' : 'left';
+    } else {
+        bot.direction = dyBot > 0 ? 'down' : 'up';
+    }
     
     // Bot shoot
     const now = Date.now();
