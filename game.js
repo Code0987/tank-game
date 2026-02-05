@@ -235,7 +235,12 @@ function update() {
                 player.health -= b.type.damage;
                 createExplosion(b.x, b.y, b.type.color);
                 balls.splice(i, 1);
-                if (player.health <= 0) endGame(false);
+                if (player.health <= 0) {
+                    // Respawn on death to continue to next round (no full end)
+                    player.health = 100;
+                    player.x = 150 + Math.random() * 50;
+                    player.y = 200 + Math.random() * 200;
+                }
                 continue;
             }
         }
@@ -248,7 +253,12 @@ function update() {
                 bot.health -= b.type.damage;
                 createExplosion(b.x, b.y, b.type.color);
                 balls.splice(i, 1);
-                if (bot.health <= 0) endGame(true);
+                if (bot.health <= 0) {
+                    // Respawn on death to continue to next round (no full end)
+                    bot.health = 100;
+                    bot.x = 550 + Math.random() * 50;
+                    bot.y = 200 + Math.random() * 200;
+                }
                 continue;
             }
         }
