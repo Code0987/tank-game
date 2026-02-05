@@ -91,7 +91,12 @@ class Tank {
         if (now - this.lastShot < 1500) return;
         this.lastShot = now;
         
-        const weaponType = WEAPON_TYPES[(round - 1) % WEAPON_TYPES.length];
+        const baseType = WEAPON_TYPES[(round - 1) % WEAPON_TYPES.length];
+        // Increase damage dealt when own health is low (desperation mode)
+        const healthFactor = Math.max(0, (100 - this.health) / 100);
+        const boostedDamage = Math.floor(baseType.damage * (1 + healthFactor * 1.5));
+        const weaponType = { ...baseType, damage: boostedDamage };
+        
         const barrelLength = 25;
         let vx = 0, vy = 0;
         let startX = this.x + this.width/2;
