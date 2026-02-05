@@ -20,9 +20,9 @@ let gameOver = false;
 
 // Weapons (faster projectiles; renamed from balls per request)
 const WEAPON_TYPES = [
-    { name: 'Bullet', color: '#ffff00', speed: 12, damage: 8, size: 6 },
-    { name: 'Fireball', color: '#ff8800', speed: 9, damage: 6, size: 8 },
-    { name: 'Snowball', color: '#88ffff', speed: 10, damage: 5, size: 7 }
+    { name: 'Bullet', color: '#ffff00', speed: 15, damage: 8, size: 6 },
+    { name: 'Fireball', color: '#ff8800', speed: 12, damage: 6, size: 8 },
+    { name: 'Snowball', color: '#88ffff', speed: 13, damage: 5, size: 7 }
 ];
 
 class Tank {
@@ -195,23 +195,28 @@ function update() {
     const dyBot = player.y - bot.y;
     const dist = Math.sqrt(dxBot * dxBot + dyBot * dyBot);
     
-    // Move towards player with some randomness based on difficulty
+    // Move towards player but maintain distance (back off if too close)
     let botDx = 0, botDy = 0;
-    if (dist > 100) {
+    const idealDist = 180;
+    if (dist > idealDist + 20) {
+        // Approach if too far
         botDx = (dxBot / dist) * bot.speed * (0.8 + difficulty * 0.1);
         botDy = (dyBot / dist) * bot.speed * (0.8 + difficulty * 0.1);
-        
-        // Add randomness for lower difficulty
-        if (difficulty < 3) {
-            botDx += (Math.random() - 0.5) * (3 - difficulty);
-            botDy += (Math.random() - 0.5) * (3 - difficulty);
-        }
+    } else if (dist < idealDist - 20) {
+        // Back off if too close
+        botDx = -(dxBot / dist) * bot.speed * 0.7;
+        botDy = -(dyBot / dist) * bot.speed * 0.7;
+    }
+    // Add randomness for lower difficulty
+    if (difficulty < 3) {
+        botDx += (Math.random() - 0.5) * (3 - difficulty);
+        botDy += (Math.random() - 0.5) * (3 - difficulty);
     }
     bot.move(botDx, botDy);
     
     // Bot shoot
     const now = Date.now();
-    if (now - bot.lastShot > (1500 - difficulty * 100) && dist < 250 + difficulty * 30) {
+    if (now - bot.lastShot > (1500 - difficulty * 100) && dist < 220 + difficulty * 30) {
         bot.shoot();
     }
     
