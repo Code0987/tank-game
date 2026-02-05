@@ -169,7 +169,7 @@ function checkCollision(a, b) {
 }
 
 function update() {
-    if (!gameRunning || gameOver) return;
+    if (!gameRunning || gameOver || !player || !bot) return;
     
     // Player movement
     let dx = 0, dy = 0;
@@ -267,9 +267,9 @@ function update() {
     ballTypeEl.textContent = BALL_TYPES[(round - 1) % BALL_TYPES.length].name;
 
     // Advance round every 20 seconds
-    const now = Date.now();
-    if (now - lastRoundTime > 20000 && gameRunning) {
-        lastRoundTime = now;
+    const currentTime = Date.now();
+    if (currentTime - lastRoundTime > 20000 && gameRunning) {
+        lastRoundTime = currentTime;
         round++;
         // Respawn at sides
         player.x = 150 + Math.random() * 50;
@@ -300,8 +300,8 @@ function draw() {
     drawBackground();
     
     // Draw tanks
-    player.draw();
-    bot.draw();
+    if (player) player.draw();
+    if (bot) bot.draw();
     
     // Draw balls
     for (let b of balls) {
@@ -386,7 +386,7 @@ function nextRound() {
 // Keyboard handlers
 window.addEventListener('keydown', e => {
     keys[e.key] = true;
-    if (e.key === ' ' && gameRunning) {
+    if (e.key === ' ' && gameRunning && player) {
         e.preventDefault();
         player.shoot();
     }
