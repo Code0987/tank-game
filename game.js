@@ -7,6 +7,7 @@ const ballTypeEl = document.getElementById('ballType');
 const menu = document.getElementById('menu');
 const gameOverEl = document.getElementById('gameOver');
 const resultEl = document.getElementById('result');
+const scoreDisplayEl = document.getElementById('scoreDisplay');
 
 let gameRunning = false;
 let keys = {};
@@ -299,9 +300,14 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
     
-    // Draw tanks
+    // Draw tanks (always on game over for final state)
     if (player) player.draw();
     if (bot) bot.draw();
+    
+    if (gameOver) {
+        // Freeze on game over (skip dynamic elements)
+        return;
+    }
     
     // Draw balls
     for (let b of balls) {
@@ -358,9 +364,16 @@ function startGame(diff) {
 function endGame(playerWon) {
     gameRunning = false;
     gameOver = true;
+    balls = [];
+    particles = [];
     gameOverEl.style.display = 'block';
     resultEl.textContent = playerWon ? 'You Win!' : 'Game Over';
     resultEl.style.color = playerWon ? '#0f0' : '#f00';
+    
+    // Calculate and display score (rounds survived + health bonus)
+    const finalScore = (round * 50) + (playerWon ? Math.floor(player.health) : Math.floor(bot.health));
+    scoreDisplayEl.textContent = `Score: ${finalScore}`;
+    scoreDisplayEl.style.color = playerWon ? '#0f0' : '#ff0';
 }
 
 function restartGame() {
