@@ -20,9 +20,9 @@ let gameOver = false;
 let lastRoundTime = 0;
 
 const BALL_TYPES = [
-    { name: 'Bullet', color: '#ffff00', speed: 8, damage: 12, size: 6 },
-    { name: 'Fireball', color: '#ff8800', speed: 5, damage: 10, size: 8 },
-    { name: 'Snowball', color: '#88ffff', speed: 6, damage: 8, size: 7 }
+    { name: 'Bullet', color: '#ffff00', speed: 8, damage: 8, size: 6 },
+    { name: 'Fireball', color: '#ff8800', speed: 5, damage: 6, size: 8 },
+    { name: 'Snowball', color: '#88ffff', speed: 6, damage: 5, size: 7 }
 ];
 
 class Tank {
@@ -88,7 +88,7 @@ class Tank {
 
     shoot() {
         const now = Date.now();
-        if (now - this.lastShot < 800) return;
+        if (now - this.lastShot < 1500) return;
         this.lastShot = now;
         
         const ballType = BALL_TYPES[(round - 1) % BALL_TYPES.length];
@@ -186,7 +186,7 @@ function update() {
     }
     
     // Player shoot
-    if (keys[' '] && Date.now() - player.lastShot > 800) {
+    if (keys[' '] && Date.now() - player.lastShot > 1500) {
         player.shoot();
     }
     
@@ -211,7 +211,7 @@ function update() {
     
     // Bot shoot
     const now = Date.now();
-    if (now - bot.lastShot > (1200 - difficulty * 150) && dist < 300 + difficulty * 50) {
+    if (now - bot.lastShot > (1500 - difficulty * 100) && dist < 250 + difficulty * 30) {
         bot.shoot();
     }
     
@@ -269,9 +269,9 @@ function update() {
     roundEl.textContent = `${round}/${maxRounds}`;
     ballTypeEl.textContent = BALL_TYPES[(round - 1) % BALL_TYPES.length].name;
 
-    // Advance round every 30 seconds (or end if max reached)
+    // Advance round every 40 seconds (or end if max reached)
     const currentTime = Date.now();
-    if (currentTime - lastRoundTime > 30000 && gameRunning) {
+    if (currentTime - lastRoundTime > 40000 && gameRunning) {
         lastRoundTime = currentTime;
         
         // Check if game should end after completing current max round
