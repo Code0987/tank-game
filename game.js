@@ -269,19 +269,10 @@ function update() {
     roundEl.textContent = `${round}/${maxRounds}`;
     ballTypeEl.textContent = BALL_TYPES[(round - 1) % BALL_TYPES.length].name;
 
-    // Advance round every 40 seconds (or end if max reached)
+    // Advance round every 30 seconds (or end if max reached)
     const currentTime = Date.now();
-    if (currentTime - lastRoundTime > 40000 && gameRunning) {
+    if (currentTime - lastRoundTime > 30000 && gameRunning) {
         lastRoundTime = currentTime;
-        
-        // Check if game should end after completing current max round
-        if (round >= maxRounds && maxRounds !== 999) {
-            // End based on final health comparison
-            const playerWon = player.health >= bot.health;
-            endGame(playerWon);
-            return;
-        }
-        
         round++;
         // Respawn at sides with full health for new round
         player.x = 150 + Math.random() * 50;
@@ -291,6 +282,14 @@ function update() {
         bot.y = 200 + Math.random() * 200;
         bot.health = 100;
         balls = [];
+        
+        // Check if game should end after max rounds (post-increment)
+        if (round > maxRounds && maxRounds !== 999) {
+            // End based on final health comparison
+            const playerWon = player.health >= bot.health;
+            endGame(playerWon);
+            return;
+        }
     }
 }
 
@@ -357,7 +356,8 @@ function gameLoop() {
 function startGame(diff) {
     difficulty = diff;
     round = 1;
-    maxRounds = parseInt(roundsSelect.value) || 5;
+    // Ensure maxRounds from select (fallback safe)
+    maxRounds = parseInt(roundsSelect ? roundsSelect.value : '5') || 5;
     menu.style.display = 'none';
     gameOver = false;
     gameRunning = true;
