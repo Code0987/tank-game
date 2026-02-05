@@ -8,11 +8,13 @@ const menu = document.getElementById('menu');
 const gameOverEl = document.getElementById('gameOver');
 const resultEl = document.getElementById('result');
 const scoreDisplayEl = document.getElementById('scoreDisplay');
+const roundsSelect = document.getElementById('roundsSelect');
 
 let gameRunning = false;
 let keys = {};
 let player, bot, balls = [], particles = [];
 let round = 1;
+let maxRounds = 5;
 let difficulty = 1;
 let gameOver = false;
 let lastRoundTime = 0;
@@ -264,19 +266,30 @@ function update() {
     // Update UI
     playerHealthEl.textContent = Math.max(0, Math.floor(player.health));
     botHealthEl.textContent = Math.max(0, Math.floor(bot.health));
-    roundEl.textContent = round;
+    roundEl.textContent = `${round}/${maxRounds}`;
     ballTypeEl.textContent = BALL_TYPES[(round - 1) % BALL_TYPES.length].name;
 
-    // Advance round every 20 seconds
+    // Advance round every 20 seconds (or end if max reached)
     const currentTime = Date.now();
     if (currentTime - lastRoundTime > 20000 && gameRunning) {
         lastRoundTime = currentTime;
         round++;
-        // Respawn at sides
+        // Respawn at sides with full health for new round
         player.x = 150 + Math.random() * 50;
         player.y = 200 + Math.random() * 200;
+        player.health = 100;
         bot.x = 550 + Math.random() * 50;
         bot.y = 200 + Math.random() * 200;
+        bot.health = 100;
+        balls = [];
+        
+        // Check if game should end after max rounds
+        if (round > maxRounds) {
+            // End based on final health comparison
+            const playerWon = player.health >= bot.health;
+            endGame(playerWon);
+            return;
+        }
     }
 }
 
@@ -343,6 +356,7 @@ function gameLoop() {
 function startGame(diff) {
     difficulty = diff;
     round = 1;
+    maxRounds = parseInt(roundsSelect.value) || 5;
     menu.style.display = 'none';
     gameOver = false;
     gameRunning = true;
@@ -382,20 +396,6 @@ function restartGame() {
     // Reset to menu
 }
 
-function nextRound() {
-    round++;
-    // Respawn tanks at sides with full health? but simple reset positions
-    player.x = 150;
-    player.y = 300;
-    player.health = 100;
-    bot.x = 600;
-    bot.y = 300;
-    bot.health = 100;
-    balls = [];
-    // Increase difficulty slightly
-    if (round > 1) difficulty = Math.min(3, difficulty + 0.5);
-}
-
 // Keyboard handlers
 window.addEventListener('keydown', e => {
     keys[e.key] = true;
@@ -403,7 +403,6 @@ window.addEventListener('keydown', e => {
         e.preventDefault();
         player.shoot();
     }
-    // Next round cheat for testing? but remove
 });
 
 window.addEventListener('keyup', e => {

@@ -59,6 +59,13 @@
         <button onclick="startGame(1)">Easy</button>
         <button onclick="startGame(2)">Medium</button>
         <button onclick="startGame(3)">Hard</button>
+        <p style="margin-top: 20px;">Select Rounds to Play:</p>
+        <select id="roundsSelect" style="padding: 8px; font-size: 16px; margin-bottom: 10px;">
+            <option value="3">3 Rounds</option>
+            <option value="5" selected>5 Rounds</option>
+            <option value="10">10 Rounds</option>
+            <option value="999">Unlimited</option>
+        </select>
     </div>
     <!-- Game over overlay (separate for visibility over hidden menu) -->
     <div id="gameOver" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.9); padding: 30px; border: 3px solid #fff; color: white; text-align: center; z-index: 30;">
