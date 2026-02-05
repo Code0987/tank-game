@@ -20,9 +20,9 @@ let gameOver = false;
 let lastRoundTime = 0;
 
 const BALL_TYPES = [
-    { name: 'Bullet', color: '#ffff00', speed: 8, damage: 20, size: 6 },
-    { name: 'Fireball', color: '#ff8800', speed: 5, damage: 15, size: 8 },
-    { name: 'Snowball', color: '#88ffff', speed: 6, damage: 10, size: 7 }
+    { name: 'Bullet', color: '#ffff00', speed: 8, damage: 12, size: 6 },
+    { name: 'Fireball', color: '#ff8800', speed: 5, damage: 10, size: 8 },
+    { name: 'Snowball', color: '#88ffff', speed: 6, damage: 8, size: 7 }
 ];
 
 class Tank {
@@ -33,7 +33,7 @@ class Tank {
         this.height = 30;
         this.color = color;
         this.isPlayer = isPlayer;
-        this.health = 100;
+        this.health = 200;
         this.speed = 3;
         this.direction = 'right'; // up, down, left, right
         this.lastShot = 0;
@@ -65,9 +65,9 @@ class Tank {
         
         ctx.restore();
         
-        // Health bar
-        const healthWidth = (this.health / 100) * this.width;
-        ctx.fillStyle = this.health > 30 ? '#0f0' : '#f00';
+        // Health bar (scaled to max 200)
+        const healthWidth = Math.min(this.width, (this.health / 200) * this.width);
+        ctx.fillStyle = this.health > 50 ? '#0f0' : '#f00';
         ctx.fillRect(this.x, this.y - 10, healthWidth, 5);
     }
 
@@ -88,7 +88,7 @@ class Tank {
 
     shoot() {
         const now = Date.now();
-        if (now - this.lastShot < 300) return;
+        if (now - this.lastShot < 800) return;
         this.lastShot = now;
         
         const ballType = BALL_TYPES[(round - 1) % BALL_TYPES.length];
@@ -186,7 +186,7 @@ function update() {
     }
     
     // Player shoot
-    if (keys[' '] && Date.now() - player.lastShot > 300) {
+    if (keys[' '] && Date.now() - player.lastShot > 800) {
         player.shoot();
     }
     
@@ -211,7 +211,7 @@ function update() {
     
     // Bot shoot
     const now = Date.now();
-    if (now - bot.lastShot > (800 - difficulty * 100) && dist < 300 + difficulty * 50) {
+    if (now - bot.lastShot > (1200 - difficulty * 150) && dist < 300 + difficulty * 50) {
         bot.shoot();
     }
     
@@ -269,9 +269,9 @@ function update() {
     roundEl.textContent = `${round}/${maxRounds}`;
     ballTypeEl.textContent = BALL_TYPES[(round - 1) % BALL_TYPES.length].name;
 
-    // Advance round every 20 seconds (or end if max reached)
+    // Advance round every 30 seconds (or end if max reached)
     const currentTime = Date.now();
-    if (currentTime - lastRoundTime > 20000 && gameRunning) {
+    if (currentTime - lastRoundTime > 30000 && gameRunning) {
         lastRoundTime = currentTime;
         
         // Check if game should end after completing current max round
@@ -286,10 +286,10 @@ function update() {
         // Respawn at sides with full health for new round
         player.x = 150 + Math.random() * 50;
         player.y = 200 + Math.random() * 200;
-        player.health = 100;
+        player.health = 200;
         bot.x = 550 + Math.random() * 50;
         bot.y = 200 + Math.random() * 200;
-        bot.health = 100;
+        bot.health = 200;
         balls = [];
     }
 }
