@@ -17,7 +17,6 @@ let round = 1;
 let maxRounds = 5;
 let difficulty = 1;
 let gameOver = false;
-let lastRoundTime = 0;
 
 // Weapons (faster projectiles; renamed from balls per request)
 const WEAPON_TYPES = [
@@ -237,10 +236,22 @@ function update() {
                 createExplosion(w.x, w.y, w.type.color);
                 weapons.splice(i, 1);
                 if (player.health <= 0) {
-                    // Respawn on death to continue to next round (no full end)
+                    // Advance round on death (rounds are kill-based, not time-based)
+                    round++;
+                    // Respawn both to continue next round
                     player.health = 100;
                     player.x = 150 + Math.random() * 50;
                     player.y = 200 + Math.random() * 200;
+                    bot.health = 100;
+                    bot.x = 550 + Math.random() * 50;
+                    bot.y = 200 + Math.random() * 200;
+                    weapons = [];
+                    
+                    // Check if all rounds complete
+                    if (round > maxRounds && maxRounds !== 999) {
+                        const playerWon = player.health >= bot.health;
+                        endGame(playerWon);
+                    }
                 }
                 continue;
             }
@@ -255,10 +266,22 @@ function update() {
                 createExplosion(w.x, w.y, w.type.color);
                 weapons.splice(i, 1);
                 if (bot.health <= 0) {
-                    // Respawn on death to continue to next round (no full end)
+                    // Advance round on death (rounds are kill-based, not time-based)
+                    round++;
+                    // Respawn both to continue next round
+                    player.health = 100;
+                    player.x = 150 + Math.random() * 50;
+                    player.y = 200 + Math.random() * 200;
                     bot.health = 100;
                     bot.x = 550 + Math.random() * 50;
                     bot.y = 200 + Math.random() * 200;
+                    weapons = [];
+                    
+                    // Check if all rounds complete
+                    if (round > maxRounds && maxRounds !== 999) {
+                        const playerWon = player.health >= bot.health;
+                        endGame(playerWon);
+                    }
                 }
                 continue;
             }
@@ -279,29 +302,6 @@ function update() {
     botHealthEl.textContent = Math.max(0, Math.floor(bot.health));
     roundEl.textContent = `${round}/${maxRounds}`;
     ballTypeEl.textContent = WEAPON_TYPES[(round - 1) % WEAPON_TYPES.length].name;
-
-    // Advance round every 30 seconds (or end if max reached)
-    const currentTime = Date.now();
-    if (currentTime - lastRoundTime > 30000 && gameRunning) {
-        lastRoundTime = currentTime;
-        round++;
-        // Respawn at sides with full health for new round
-        player.x = 150 + Math.random() * 50;
-        player.y = 200 + Math.random() * 200;
-        player.health = 100;
-        bot.x = 550 + Math.random() * 50;
-        bot.y = 200 + Math.random() * 200;
-        bot.health = 100;
-        weapons = [];
-        
-        // Check if game should end after max rounds (post-increment)
-        if (round > maxRounds && maxRounds !== 999) {
-            // End based on final health comparison
-            const playerWon = player.health >= bot.health;
-            endGame(playerWon);
-            return;
-        }
-    }
 }
 
 function createExplosion(x, y, color) {
@@ -378,7 +378,6 @@ function startGame(diff) {
     bot = new Tank(600, 300, '#ff0000', false);
     weapons = [];
     particles = [];
-    lastRoundTime = Date.now();
     
     // Initial round weapon type display
     ballTypeEl.textContent = WEAPON_TYPES[0].name;
