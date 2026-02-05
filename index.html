@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tank Battle</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            image-rendering: pixelated;
+            border: 2px solid #333;
+        }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            z-index: 10;
+        }
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 2px solid #fff;
+            color: white;
+            text-align: center;
+            z-index: 20;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game" width="800" height="600"></canvas>
+    <div id="ui">
+        <div>Player Health: <span id="playerHealth">100</span></div>
+        <div>Bot Health: <span id="botHealth">100</span></div>
+        <div>Round: <span id="round">1</span> - Ball: <span id="ballType">Bullet</span></div>
+    </div>
+    <div id="menu">
+        <h1>Tank Battle</h1>
+        <p>Select Difficulty:</p>
+        <button onclick="startGame(1)">Easy</button>
+        <button onclick="startGame(2)">Medium</button>
+        <button onclick="startGame(3)">Hard</button>
+        <div id="gameOver" style="display: none;">
+            <h2 id="result"></h2>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
