@@ -33,7 +33,7 @@ class Tank {
         this.height = 30;
         this.color = color;
         this.isPlayer = isPlayer;
-        this.health = 200;
+        this.health = 100;
         this.speed = 3;
         this.direction = 'right'; // up, down, left, right
         this.lastShot = 0;
@@ -65,9 +65,9 @@ class Tank {
         
         ctx.restore();
         
-        // Health bar (scaled to max 200)
-        const healthWidth = Math.min(this.width, (this.health / 200) * this.width);
-        ctx.fillStyle = this.health > 50 ? '#0f0' : '#f00';
+        // Health bar
+        const healthWidth = (this.health / 100) * this.width;
+        ctx.fillStyle = this.health > 30 ? '#0f0' : '#f00';
         ctx.fillRect(this.x, this.y - 10, healthWidth, 5);
     }
 
@@ -286,10 +286,10 @@ function update() {
         // Respawn at sides with full health for new round
         player.x = 150 + Math.random() * 50;
         player.y = 200 + Math.random() * 200;
-        player.health = 200;
+        player.health = 100;
         bot.x = 550 + Math.random() * 50;
         bot.y = 200 + Math.random() * 200;
-        bot.health = 200;
+        bot.health = 100;
         balls = [];
     }
 }
