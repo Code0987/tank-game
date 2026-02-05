@@ -59,11 +59,12 @@
         <button onclick="startGame(1)">Easy</button>
         <button onclick="startGame(2)">Medium</button>
         <button onclick="startGame(3)">Hard</button>
-        <div id="gameOver" style="display: none;">
-            <h2 id="result"></h2>
-            <div id="scoreDisplay" style="margin: 10px 0; font-size: 18px;"></div>
-            <button onclick="restartGame()">Play Again</button>
-        </div>
+    </div>
+    <!-- Game over overlay (separate for visibility over hidden menu) -->
+    <div id="gameOver" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.9); padding: 30px; border: 3px solid #fff; color: white; text-align: center; z-index: 30;">
+        <h2 id="result"></h2>
+        <div id="scoreDisplay" style="margin: 15px 0; font-size: 20px; font-weight: bold;"></div>
+        <button onclick="restartGame()" style="font-size: 18px; padding: 12px 25px;">Play Again</button>
     </div>
 
     <script src="game.js"></script>
